@@ -195,6 +195,7 @@ const Liri = (function() {
           console.log('Error retrieving joke');
         } else {
           const joke = JSON.parse(data).joke;
+          console.log(joke);
           say.speak(joke);
         }
       });
