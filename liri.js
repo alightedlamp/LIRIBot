@@ -4,16 +4,35 @@ const fs = require('fs');
 const request = require('request');
 const keys = require('./config/keys');
 
+const config = {
+  logFile: './resources/log.txt',
+  commandFile: './resources/command.txt',
+  hotwordsFile: './config/monique.pmdl',
+  twitterUserId: '950063649590259712'
+};
+
+// Configure speach recognition
+const Sonus = require('sonus');
+const speech = require('@google-cloud/speech');
+const speechClient = new speech.SpeechClient({
+  projectID: 'monique-191504',
+  keyFilename: './config/keyfile.json'
+});
+const hotwords = [{ file: config.hotwordsFile, hotword: 'monique' }];
+const sonus = Sonus.init({ hotwords }, speechClient);
+
+Sonus.start(sonus);
+sonus.on('hotword', (index, keyword) => console.log(`!${keyword}`));
+sonus.on('final-result', result => console.log(result));
+
+// Use say for text to speech
+const say = require('say');
+
+// Set up third-party services
 const Spotify = require('node-spotify-api');
 const Twitter = require('twitter');
 const spotify = new Spotify(keys.spotify);
-const client = new Twitter(keys.twitter);
-
-const config = {
-  logFile: './txt/log.txt',
-  commandFile: './txt/command.txt',
-  twitterUserId: '950063649590259712'
-};
+const twitterClient = new Twitter(keys.twitter);
 
 // Liri lives here. Public functions are exposed in the returned object literal
 const Liri = (function() {
@@ -47,12 +66,20 @@ const Liri = (function() {
     Liri.log(`${new Date()}: Response: ${output}`);
   };
 
+  const sayAction = function(phrase) {
+    say.speak(phrase, 'Alex', err => {
+      console.log('Action not spoken');
+      Liri.log('Error: action not spoken');
+    });
+  };
+
   return {
     log: function(text) {
       logEvent(`${text}\n`);
     },
     'my-tweets': function() {
-      client
+      sayAction('Here are your tweets');
+      twitterClient
         .get('/statuses/user_timeline', {
           user_id: config.twitterUserId,
           count: 10
@@ -72,6 +99,7 @@ const Liri = (function() {
       } else if (process.argv[3]) {
         song = process.argv[3];
       }
+      sayAction(`Here are some tracks from spotify that match ${song}`);
       spotify
         .search({ type: 'track', query: song, limit: 10 })
         .then(response => {
@@ -95,6 +123,7 @@ const Liri = (function() {
       if (!movieName) {
         movieName = 'Mr Nobody';
       }
+      sayAction(`Here is information about ${movieName}`);
       request(
         `http://www.omdbapi.com/?t=${movieName}&y=&plot=short&apikey=trilogy`,
         function(err, response, body) {
