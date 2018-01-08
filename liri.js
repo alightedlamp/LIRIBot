@@ -21,8 +21,35 @@ const speechClient = new speech.SpeechClient({
 const hotwords = [{ file: config.hotwordsFile, hotword: 'monique' }];
 const sonus = Sonus.init({ hotwords }, speechClient);
 
+// Feed Liri commands to Sonus
+const commands = {
+  'my tweets': function() {
+    console.log('Voice command: my tweets');
+    Liri['my-tweets']();
+  },
+  'spotify this song': function() {
+    console.log('Voice command: spotify this song');
+    Liri['spotify-this-song']();
+  },
+  'movie this': function() {
+    console.log('Voice command: movie this');
+    Liri['movie-this']();
+  },
+  'play techno': function() {
+    console.log('Voice command: play techno');
+    Liri['play-techno']();
+  },
+  'tell me a joke': function() {
+    console.log('Voice command: tell me a joke');
+    Liri['tell-me-a-joke']();
+  }
+};
+Sonus.annyang.addCommands(commands);
+
 Sonus.start(sonus);
+// Logs when hotword is recognized
 sonus.on('hotword', (index, keyword) => console.log(`!${keyword}`));
+// Logs the final text result
 sonus.on('final-result', result => console.log(result));
 
 // Use say for text to speech
@@ -66,10 +93,10 @@ const Liri = (function() {
     Liri.log(`${new Date()}: Response: ${output}`);
   };
 
-  const sayAction = function(phrase) {
+  const sayPhrase = function(phrase) {
     say.speak(phrase, 'Alex', err => {
       console.log('Action not spoken');
-      Liri.log('Error: action not spoken');
+      Liri.log(`${new Date()}: Error: action not spoken`);
     });
   };
 
@@ -78,7 +105,7 @@ const Liri = (function() {
       logEvent(`${text}\n`);
     },
     'my-tweets': function() {
-      sayAction('Here are your tweets');
+      sayPhrase('Here are your tweets');
       twitterClient
         .get('/statuses/user_timeline', {
           user_id: config.twitterUserId,
@@ -99,7 +126,7 @@ const Liri = (function() {
       } else if (process.argv[3]) {
         song = process.argv[3];
       }
-      sayAction(`Here are some tracks from spotify that match ${song}`);
+      sayPhrase(`Here are some tracks from spotify that match ${song}`);
       spotify
         .search({ type: 'track', query: song, limit: 10 })
         .then(response => {
@@ -123,7 +150,7 @@ const Liri = (function() {
       if (!movieName) {
         movieName = 'Mr Nobody';
       }
-      sayAction(`Here is information about ${movieName}`);
+      sayPhrase(`Here is information about ${movieName}`);
       request(
         `http://www.omdbapi.com/?t=${movieName}&y=&plot=short&apikey=trilogy`,
         function(err, response, body) {
@@ -150,6 +177,25 @@ const Liri = (function() {
           console.log(err);
         } else {
           Liri[content[0]](content[1]);
+        }
+      });
+    },
+    'play-techno': function() {
+      sayPhrase('Oonce oonce oonce oonce oonce');
+    },
+    'tell-me-a-joke': function() {
+      const options = {
+        url: 'https://icanhazdadjoke.com/',
+        headers: {
+          Accept: 'application/json'
+        }
+      };
+      request(options, function(err, response, data) {
+        if (err) {
+          console.log('Error retrieving joke');
+        } else {
+          const joke = JSON.parse(data).joke;
+          say.speak(joke);
         }
       });
     }
