@@ -21,27 +21,27 @@ const speechClient = new speech.SpeechClient({
 const hotwords = [{ file: config.hotwordsFile, hotword: 'monique' }];
 const sonus = Sonus.init({ hotwords }, speechClient);
 
-// Feed Liri commands to Sonus
+// Feed Monique commands to Sonus
 const commands = {
   'my tweets': function() {
     console.log('Voice command: my tweets');
-    Liri['my-tweets']();
+    Monique['my-tweets']();
   },
   'spotify this song': function() {
     console.log('Voice command: spotify this song');
-    Liri['spotify-this-song']();
+    Monique['spotify-this-song']();
   },
   'movie this': function() {
     console.log('Voice command: movie this');
-    Liri['movie-this']();
+    Monique['movie-this']();
   },
   'play techno': function() {
     console.log('Voice command: play techno');
-    Liri['play-techno']();
+    Monique['play-techno']();
   },
   'tell me a joke': function() {
     console.log('Voice command: tell me a joke');
-    Liri['tell-me-a-joke']();
+    Monique['tell-me-a-joke']();
   }
 };
 Sonus.annyang.addCommands(commands);
@@ -61,8 +61,8 @@ const Twitter = require('twitter');
 const spotify = new Spotify(keys.spotify);
 const twitterClient = new Twitter(keys.twitter);
 
-// Liri lives here. Public functions are exposed in the returned object literal
-const Liri = (function() {
+// Monique lives here. Public functions are exposed in the returned object literal
+const Monique = (function() {
   const logEvent = function(text) {
     fs.appendFile(config.logFile, text, function(err) {
       if (err) {
@@ -90,13 +90,13 @@ const Liri = (function() {
     if (!Array.isArray(output)) {
       output = output.replace(/[\n\r]+/g, '; ');
     }
-    Liri.log(`${new Date()}: Response: ${output}`);
+    Monique.log(`${new Date()}: Response: ${output}`);
   };
 
   const sayPhrase = function(phrase) {
     say.speak(phrase, 'Alex', err => {
       console.log('Action not spoken');
-      Liri.log(`${new Date()}: Error: action not spoken`);
+      Monique.log(`${new Date()}: Error: action not spoken`);
     });
   };
 
@@ -176,7 +176,7 @@ const Liri = (function() {
         if (err) {
           console.log(err);
         } else {
-          Liri[content[0]](content[1]);
+          Monique[content[0]](content[1]);
         }
       });
     },
@@ -205,7 +205,7 @@ const Liri = (function() {
 
 const command = process.argv[2];
 const run = function() {
-  Liri.log(`${new Date()}: Running command '${process.argv[2]}'`);
-  Liri[command]();
+  Monique.log(`${new Date()}: Running command '${process.argv[2]}'`);
+  Monique[command]();
 };
-Liri.hasOwnProperty(command) ? run() : 'Invalid command';
+Monique.hasOwnProperty(command) ? run() : 'Invalid command';
