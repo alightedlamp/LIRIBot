@@ -67,8 +67,10 @@ const Liri = (function() {
         .catch(err => console.log(err));
     },
     'spotify-this-song': function(song) {
-      if (!song) {
+      if (!song && !process.argv[3]) {
         song = 'All the Small Things';
+      } else if (process.argv[3]) {
+        song = process.argv[3];
       }
       spotify
         .search({ type: 'track', query: song, limit: 10 })
