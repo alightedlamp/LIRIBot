@@ -2,6 +2,7 @@ require('dotenv').config();
 
 const fs = require('fs');
 const request = require('request');
+const open = require('open');
 const keys = require('./config/keys');
 
 const config = {
@@ -104,6 +105,11 @@ const Monique = (function() {
     log: function(text) {
       logEvent(`${text}\n`);
     },
+
+    // Will add a command to the schedule
+    'add-command': function() {},
+
+    // Outputs social media stats
     'my-tweets': function() {
       sayPhrase('Here are your tweets');
       twitterClient
@@ -120,6 +126,8 @@ const Monique = (function() {
         })
         .catch(err => console.log(err));
     },
+
+    // Get informatino about the chosen track name
     'spotify-this-song': function(song) {
       if (!song && !process.argv[3]) {
         song = 'All the Small Things';
@@ -131,6 +139,8 @@ const Monique = (function() {
         .search({ type: 'track', query: song, limit: 10 })
         .then(response => {
           const items = response.tracks.items;
+
+          // Output response info to console
           handleOutput(
             Object.keys(items)
               .map(song => {
@@ -142,9 +152,14 @@ const Monique = (function() {
               })
               .join('')
           );
+
+          // Open the first song in user's browser
+          open(items[0].external_urls.spotify);
         })
         .catch(err => console.log(err));
     },
+
+    // Get information about the chosen movie name
     'movie-this': function() {
       let movieName = process.argv[3];
       if (!movieName) {
@@ -171,6 +186,8 @@ const Monique = (function() {
         }
       );
     },
+
+    // Executes a command from the command file
     'do-what-it-says': function() {
       readCommandFile(function(err, content) {
         if (err) {
@@ -180,9 +197,13 @@ const Monique = (function() {
         }
       });
     },
+
+    // Makes the computer voice try to make techno
     'play-techno': function() {
       sayPhrase('Oonce oonce oonce oonce oonce');
     },
+
+    // Tells a bad joke from the I Can Haz Dad Joke API
     'tell-me-a-joke': function() {
       const options = {
         url: 'https://icanhazdadjoke.com/',
