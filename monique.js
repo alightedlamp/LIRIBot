@@ -9,7 +9,8 @@ const config = {
   logFile: './resources/log.txt',
   commandFile: './resources/command.txt',
   hotwordsFile: './config/monique.pmdl',
-  twitterUserId: '950063649590259712'
+  twitterUserId: '950063649590259712',
+  voice: 'Victoria'
 };
 
 // Configure speach recognition
@@ -24,17 +25,17 @@ const sonus = Sonus.init({ hotwords }, speechClient);
 
 // Feed Monique commands to Sonus
 const commands = {
-  'my tweets': function() {
+  '(my) tweets': function() {
     console.log('Voice command: my tweets');
     Monique['my-tweets']();
   },
-  'spotify this song': function() {
+  'spotify (this) :song': function(song) {
     console.log('Voice command: spotify this song');
-    Monique['spotify-this-song']();
+    Monique['spotify-this-song'](song);
   },
-  'movie this': function() {
+  'movie (this) :movie': function(movie) {
     console.log('Voice command: movie this');
-    Monique['movie-this']();
+    Monique['movie-this'](movie);
   },
   'play techno': function() {
     console.log('Voice command: play techno');
@@ -77,7 +78,9 @@ const Monique = (function() {
     fs.readFile(config.commandFile, 'utf8', function(err, commandfile) {
       if (err) {
         callback(
-          'Error retrieving command file, "do-what-it-says" command will not function'
+          new Error(
+            'Error retrieving command file, "do-what-it-says" command will not function'
+          )
         );
       } else {
         callback(null, commandfile.split(','));
@@ -89,13 +92,13 @@ const Monique = (function() {
   const handleOutput = function(output) {
     console.log(output);
     if (!Array.isArray(output)) {
-      output = output.replace(/[\n\r]+/g, '; ');
+      output = output.replace(/\n+/g, '; ');
     }
     Monique.log(`${new Date()}: Response: ${output}`);
   };
 
-  const sayPhrase = function(phrase) {
-    say.speak(phrase, 'Alex', err => {
+  const sayPhrase = function(phrase, voice) {
+    say.speak(phrase, voice, err => {
       console.log('Action not spoken');
       Monique.log(`${new Date()}: Error: action not spoken`);
     });
@@ -106,12 +109,9 @@ const Monique = (function() {
       logEvent(`${text}\n`);
     },
 
-    // Will add a command to the schedule
-    'add-command': function() {},
-
     // Outputs social media stats
     'my-tweets': function() {
-      sayPhrase('Here are your tweets');
+      sayPhrase('Here are your tweets', config.voice);
       twitterClient
         .get('/statuses/user_timeline', {
           user_id: config.twitterUserId,
@@ -127,14 +127,14 @@ const Monique = (function() {
         .catch(err => console.log(err));
     },
 
-    // Get informatino about the chosen track name
+    // Get information about the chosen track name
     'spotify-this-song': function(song) {
       if (!song && !process.argv[3]) {
         song = 'All the Small Things';
       } else if (process.argv[3]) {
         song = process.argv[3];
       }
-      sayPhrase(`Here are some tracks from spotify that match ${song}`);
+      sayPhrase(`Here are some tracks from spotify that match ${song}`, config.voice);
       spotify
         .search({ type: 'track', query: song, limit: 10 })
         .then(response => {
@@ -165,7 +165,7 @@ const Monique = (function() {
       if (!movieName) {
         movieName = 'Mr Nobody';
       }
-      sayPhrase(`Here is information about ${movieName}`);
+      sayPhrase(`Here is information about ${movieName}`, config.voice);
       request(
         `http://www.omdbapi.com/?t=${movieName}&y=&plot=short&apikey=trilogy`,
         function(err, response, body) {
@@ -214,10 +214,10 @@ const Monique = (function() {
       request(options, function(err, response, data) {
         if (err) {
           console.log('Error retrieving joke');
-        } else {
+        } else if (!err && response.statusCode === 200) {
           const joke = JSON.parse(data).joke;
           console.log(joke);
-          say.speak(joke);
+          say.speak(joke, 'Victoria');
         }
       });
     }
