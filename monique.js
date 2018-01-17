@@ -212,7 +212,10 @@ const Monique = (function() {
 
     // Makes the computer voice try to make techno
     'play-techno': function() {
-      sayPhrase('Oonce oonce oonce oonce oonce');
+      sayPhrase(
+        'Oonce oonce oonce oonce, chicka chicka, oonce oonce, doodoo da doo doo, doodoo da doo doo, oonce oonce oonce oonce',
+        config.voice
+      );
     },
 
     // Tells a bad joke from the I Can Haz Dad Joke API
