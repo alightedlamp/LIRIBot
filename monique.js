@@ -48,12 +48,6 @@ const commands = {
 };
 Sonus.annyang.addCommands(commands);
 
-Sonus.start(sonus);
-// Logs when hotword is recognized
-sonus.on('hotword', (index, keyword) => console.log(`!${keyword}`));
-// Logs the final text result
-sonus.on('final-result', result => console.log(result));
-
 // Use say for text to speech
 const say = require('say');
 
@@ -109,6 +103,21 @@ const Monique = (function() {
       logEvent(`${text}\n`);
     },
 
+    start: function() {
+      console.log('Hello, how can I help?');
+      Sonus.start(sonus);
+      // Logs when hotword is recognized
+      sonus.on('hotword', (index, keyword) => console.log(`!${keyword}`));
+      // Logs the final text result
+      sonus.on('final-result', result => console.log(result));
+    },
+
+    help: function() {
+      console.log(
+        "'start': enables voice commands\n'my-tweets': outputs my last 10 tweeks\n'spotify-this-song': opens url to first track in browser and outputs 10 search results\n'movie-this': outputs information for the requested movie\n'do-what-it-says': executes the command in the 'command.txt' file\n'play-techno': hear the computer beatbox\n'tell-me-a-joke': hear a bad joke"
+      );
+    },
+
     // Outputs social media stats
     'my-tweets': function() {
       sayPhrase('Here are your tweets', config.voice);
@@ -134,7 +143,10 @@ const Monique = (function() {
       } else if (process.argv[3]) {
         song = process.argv[3];
       }
-      sayPhrase(`Here are some tracks from spotify that match ${song}`, config.voice);
+      sayPhrase(
+        `Here are some tracks from spotify that match ${song}`,
+        config.voice
+      );
       spotify
         .search({ type: 'track', query: song, limit: 10 })
         .then(response => {
