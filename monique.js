@@ -1,61 +1,11 @@
-require('dotenv').config();
+require('./lib.js');
+require('./config.js');
+require('./speach.js');
 
 const fs = require('fs');
 const request = require('request');
 const open = require('open');
-const keys = require('./config/keys');
-
-const config = {
-  logFile: './resources/log.txt',
-  commandFile: './resources/command.txt',
-  hotwordsFile: './config/monique.pmdl',
-  twitterUserId: '950063649590259712',
-  voice: 'Victoria'
-};
-
-// Configure speach recognition
-const Sonus = require('sonus');
-const speech = require('@google-cloud/speech');
-const speechClient = new speech.SpeechClient({
-  projectID: 'monique-191504',
-  keyFilename: './config/keyfile.json'
-});
-const hotwords = [{ file: config.hotwordsFile, hotword: 'monique' }];
-const sonus = Sonus.init({ hotwords }, speechClient);
-
-// Feed Monique commands to Sonus
-const commands = {
-  '(my) tweets': function() {
-    console.log('Voice command: my tweets');
-    Monique['my-tweets']();
-  },
-  'spotify (this) :song': function(song) {
-    console.log('Voice command: spotify this song');
-    Monique['spotify-this-song'](song);
-  },
-  'movie (this) :movie': function(movie) {
-    console.log('Voice command: movie this');
-    Monique['movie-this'](movie);
-  },
-  'play techno': function() {
-    console.log('Voice command: play techno');
-    Monique['play-techno']();
-  },
-  'tell me a joke': function() {
-    console.log('Voice command: tell me a joke');
-    Monique['tell-me-a-joke']();
-  }
-};
-Sonus.annyang.addCommands(commands);
-
-// Use say for text to speech
-const say = require('say');
-
-// Set up third-party services
-const Spotify = require('node-spotify-api');
-const Twitter = require('twitter');
-const spotify = new Spotify(keys.spotify);
-const twitterClient = new Twitter(keys.twitter);
+const config = require('./config.js');
 
 // Monique lives here. Public functions are exposed in the returned object literal
 const Monique = (function() {
@@ -238,10 +188,3 @@ const Monique = (function() {
     }
   };
 })();
-
-const command = process.argv[2];
-const run = function() {
-  Monique.log(`${new Date()}: Running command '${process.argv[2]}'`);
-  Monique[command]();
-};
-Monique.hasOwnProperty(command) ? run() : console.log('Invalid command');
