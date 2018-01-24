@@ -1,0 +1,32 @@
+{
+  "name": "monique",
+  "version": "1.0.0",
+  "description": "Monique is a speech recognition application built with Node that responds to various voice commands:",
+  "main": "monique.js",
+  "dependencies": {
+    "@google-cloud/speech": "^1.0.0",
+    "dotenv": "^4.0.0",
+    "grpc": "^1.8.4",
+    "node-spotify-api": "^1.0.7",
+    "open": "0.0.5",
+    "request": "^2.83.0",
+    "say": "^0.14.0",
+    "snowboy": "^1.2.0",
+    "sonus": "^0.1.9",
+    "twitter": "^1.7.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alightedlamp/Monique.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/alightedlamp/Monique/issues"
+  },
+  "homepage": "https://github.com/alightedlamp/Monique#readme"
+}
